@@ -63,6 +63,10 @@ class BillingConnector @JvmOverloads constructor(
         getBillingService().close()
     }
 
+    fun getSubPriceByTag(tag:String){
+        getBillingService()
+    }
+
     private fun getBillingService(): IBillingService {
         return mBillingService ?: let {
             throw RuntimeException("Call BillingConnector to initialize billing service")

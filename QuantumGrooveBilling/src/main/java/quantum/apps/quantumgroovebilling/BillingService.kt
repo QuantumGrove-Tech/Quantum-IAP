@@ -5,7 +5,20 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import com.android.billingclient.api.*
+import com.android.billingclient.api.AcknowledgePurchaseParams
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener
+import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.BillingClientStateListener
+import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
+import com.android.billingclient.api.ConsumeParams
+import com.android.billingclient.api.ProductDetails
+import com.android.billingclient.api.Purchase
+import com.android.billingclient.api.PurchasesResult
+import com.android.billingclient.api.PurchasesUpdatedListener
+import com.android.billingclient.api.QueryProductDetailsParams
+import com.android.billingclient.api.QueryPurchasesParams
+import com.android.billingclient.api.queryPurchasesAsync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,7 +38,7 @@ class BillingService(
 
     override fun init() {
         mBillingClient = BillingClient.newBuilder(context).setListener(this).enablePendingPurchases().build()
-        mBillingClient.startConnection(object : BillingClientStateListener{
+        mBillingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingServiceDisconnected() {
                 log("onBillingServiceDisconnected")
             }
@@ -46,6 +59,7 @@ class BillingService(
                             }
                         }
                     }
+
                     else -> {
                         isBillingClientConnected(false, billingResult.responseCode)
                     }
@@ -62,14 +76,14 @@ class BillingService(
     private suspend fun queryPurchases() {
         val inAppResult: PurchasesResult = mBillingClient.queryPurchasesAsync(
             QueryPurchasesParams.newBuilder()
-            .setProductType(BillingClient.ProductType.INAPP)
-            .build()
+                .setProductType(BillingClient.ProductType.INAPP)
+                .build()
         )
         processPurchases(inAppResult.purchasesList, isRestore = true)
         val subsResult: PurchasesResult = mBillingClient.queryPurchasesAsync(
             QueryPurchasesParams.newBuilder()
-            .setProductType(BillingClient.ProductType.SUBS)
-            .build()
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build()
         )
         processPurchases(subsResult.purchasesList, isRestore = true)
     }
@@ -100,7 +114,7 @@ class BillingService(
                 val builder = BillingFlowParams.ProductDetailsParams.newBuilder()
                     .setProductDetails(productDetails)
 
-                if(type == BillingClient.ProductType.SUBS){
+                if (type == BillingClient.ProductType.SUBS) {
                     productDetails.subscriptionOfferDetails?.getOrNull(0)?.let {
                         builder.setOfferToken(it.offerToken)
                     }
@@ -109,7 +123,7 @@ class BillingService(
                 val billingFlowParamsBuilder = BillingFlowParams.newBuilder().setProductDetailsParamsList(productDetailsParamsList)
 
                 val billingFlowParams = billingFlowParamsBuilder.build()
-                
+
                 mBillingClient.launchBillingFlow(activity, billingFlowParams)
             }
         }
@@ -141,7 +155,7 @@ class BillingService(
         val responseCode = billingResult.responseCode
         val debugMessage = billingResult.debugMessage
         log("onPurchasesUpdated: responseCode:$responseCode debugMessage: $debugMessage")
-        if (!billingResult.isOk()){
+        if (!billingResult.isOk()) {
             updateFailedPurchases(purchases?.map { getPurchaseInfo(it) }, responseCode)
         }
         when (responseCode) {
@@ -149,8 +163,10 @@ class BillingService(
                 log("onPurchasesUpdated. purchase: $purchases")
                 processPurchases(purchases)
             }
+
             BillingClient.BillingResponseCode.USER_CANCELED ->
                 log("onPurchasesUpdated: User canceled the purchase")
+
             BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> {
                 log("onPurchasesUpdated: The user already owns this item")
                 //item already owned? call queryPurchases to verify and process all such items
@@ -158,6 +174,7 @@ class BillingService(
                     queryPurchases()
                 }
             }
+
             BillingClient.BillingResponseCode.DEVELOPER_ERROR ->
                 Log.e(
                     TAG, "onPurchasesUpdated: Developer error means that Google Play " +
@@ -195,6 +212,7 @@ class BillingService(
                                             BillingClient.BillingResponseCode.OK -> {
                                                 productOwned(getPurchaseInfo(purchase), false)
                                             }
+
                                             else -> {
                                                 Log.d(
                                                     TAG,
@@ -205,11 +223,13 @@ class BillingService(
                                         }
                                     }
                                 }
+
                                 else -> {
                                     productOwned(getPurchaseInfo(purchase), isRestore)
                                 }
                             }
                         }
+
                         BillingClient.ProductType.SUBS -> {
                             subscriptionOwned(getPurchaseInfo(purchase), isRestore)
                         }
@@ -270,12 +290,14 @@ class BillingService(
 
         val productList = mutableListOf<QueryProductDetailsParams.Product>()
         this.forEach {
-            productList.add(QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(it)
-                .setProductType(type)
-                .build())
+            productList.add(
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(it)
+                    .setProductType(type)
+                    .build()
+            )
         }
-        
+
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList)
 
         mBillingClient.queryProductDetailsAsync(params.build()) { billingResult, productDetailsList ->
@@ -287,8 +309,8 @@ class BillingService(
 
                 productDetails.mapNotNull { entry ->
                     entry.value?.let {
-                        when(it.productType){
-                            BillingClient.ProductType.SUBS->{
+                        when (it.productType) {
+                            BillingClient.ProductType.SUBS -> {
                                 entry.key to (it.subscriptionOfferDetails?.getOrNull(0)?.pricingPhases?.pricingPhaseList?.map { pricingPhase ->
                                     DataWrappers.ProductDetails(
                                         title = it.title,
@@ -302,7 +324,8 @@ class BillingService(
                                     )
                                 } ?: listOf())
                             }
-                            else->{
+
+                            else -> {
                                 entry.key to listOf(
                                     DataWrappers.ProductDetails(
                                         title = it.title,
@@ -338,6 +361,7 @@ class BillingService(
         }
 
         val productDetailsCached = productDetails[this]
+
         if (productDetailsCached != null) {
             done(productDetailsCached)
             return
@@ -345,10 +369,12 @@ class BillingService(
 
         val productList = mutableListOf<QueryProductDetailsParams.Product>()
         this.forEach {
-            productList.add(QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(it.toString())
-                .setProductType(type)
-                .build())
+            productList.add(
+                QueryProductDetailsParams.Product.newBuilder()
+                    .setProductId(it.toString())
+                    .setProductType(type)
+                    .build()
+            )
         }
 
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList)
@@ -358,9 +384,10 @@ class BillingService(
                 billingResult.isOk() -> {
                     isBillingClientConnected(true, billingResult.responseCode)
                     val productDetails: ProductDetails? = productDetailsList.find { it.productId == this }
-                   // productDetails[this] = productDetails
+                    // productDetails[this] = productDetails
                     done(productDetails)
                 }
+
                 else -> {
                     log("launchBillingFlow. Failed to get details for sku: $this")
                     done(null)
@@ -369,14 +396,22 @@ class BillingService(
         }
     }
 
+    fun getSubPriceByTag(sku: String): String {
+        var price = ""
+        productDetails[sku]?.subscriptionOfferDetails?.getOrNull(0)?.pricingPhases?.pricingPhaseList?.forEach {
+            price = it.formattedPrice
+        }
+        return price
+    }
+
     private fun String.isProductReady(): Boolean {
         return productDetails.containsKey(this) && productDetails[this] != null
     }
 
     override fun onAcknowledgePurchaseResponse(billingResult: BillingResult) {
         log("onAcknowledgePurchaseResponse: billingResult: $billingResult")
-        if(!billingResult.isOk()){
-            updateFailedPurchase(billingResponseCode =  billingResult.responseCode)
+        if (!billingResult.isOk()) {
+            updateFailedPurchase(billingResponseCode = billingResult.responseCode)
         }
     }
 

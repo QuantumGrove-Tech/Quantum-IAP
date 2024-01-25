@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         connector.setPurchaseListener(object : PurchaseListener {
             override fun onPricesUpdated(iapKeyPrices: Map<String, List<DataWrappers.ProductDetails>>) {
+
                 // list of available products will be received here, so you can update UI with prices if needed
             }
 
