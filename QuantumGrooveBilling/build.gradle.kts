@@ -1,7 +1,7 @@
 plugins {
+    id("maven-publish")
     id("com.android.library")
     id("kotlin-android")
-    id("maven-publish")
 }
 
 android {
@@ -30,12 +30,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
+//    publishing {
+//        singleVariant("release") {
+//            withSourcesJar()
+//            withJavadocJar()
+//        }
+//    }
 }
 
 dependencies {
@@ -45,9 +45,9 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = "QuantumGrove-Tech"
+            groupId = "com.github.QuantumGrove-Tech"
             artifactId = "Quantum-IAP"
-            version = "v.1.0.0"
+            version = "1.0.0"
 
             afterEvaluate {
                 from(components["release"])
