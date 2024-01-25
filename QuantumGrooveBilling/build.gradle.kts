@@ -39,15 +39,14 @@ android {
 }
 
 dependencies {
-
     implementation("com.android.billingclient:billing-ktx:6.1.0")
 }
 
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = "Quantum-Grove"
-            artifactId = "Billing-Helper"
+            groupId = "QuantumGrove-Tech"
+            artifactId = "Quantum-IAP"
             version = "v.1.0.0"
 
             afterEvaluate {
