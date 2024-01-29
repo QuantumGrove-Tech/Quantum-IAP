@@ -15,9 +15,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                "proguard-rules.pro"
-            )
+            proguardFiles("proguard-rules.pro")
         }
     }
 
@@ -47,7 +45,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.github.QuantumGrove-Tech"
             artifactId = "Quantum-IAP"
-            version = "1.0.1"
+            version = "1.0.2"
 
             afterEvaluate {
                 from(components["release"])
