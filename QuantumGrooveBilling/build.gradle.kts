@@ -40,12 +40,6 @@ android {
 
 dependencies {
     implementation("com.android.billingclient:billing-ktx:6.1.0")
-
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-
-    testImplementation("junit:junit:4.13.2")
 }
 
 publishing {
