@@ -30,12 +30,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-//    publishing {
-//        singleVariant("release") {
-//            withSourcesJar()
-//            withJavadocJar()
-//        }
-//    }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -45,7 +45,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = "com.github.QuantumGrove-Tech"
+            groupId = "quantum.apps"
             artifactId = "Quantum-IAP"
             version = "1.0.0"
 
