@@ -45,7 +45,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = "quantum.apps"
+            groupId = "com.github.QuantumGrove-Tech"
             artifactId = "Quantum-IAP"
             version = "1.0.0"
 
