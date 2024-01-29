@@ -21,13 +21,13 @@ android {
         }
     }
 
-    kotlin {
-        jvmToolchain(17)
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     publishing {
@@ -47,7 +47,7 @@ publishing {
         create<MavenPublication>("release") {
             groupId = "com.github.QuantumGrove-Tech"
             artifactId = "Quantum-IAP"
-            version = "1.0.0"
+            version = "1.0.1"
 
             afterEvaluate {
                 from(components["release"])
